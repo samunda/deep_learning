@@ -1,0 +1,8 @@
+Deep Learning with TensorFlow (MNIST)
+
+Fully Connected Neural Network
+Convolutional Neural Network (CNN)
+TensorBoard
+
+TensorBoard Usage:
+tensorboard --logdir tmp/demo5
