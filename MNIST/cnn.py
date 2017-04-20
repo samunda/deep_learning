@@ -16,6 +16,19 @@ def display_data(data):
     plt.pause(0.01)
 
 
+def weights_to_image(W):
+    # scale weights to [0 255] and convert to uint8 (maybe change scaling?)
+    x_min = tf.reduce_min(W)
+    x_max = tf.reduce_max(W)
+    weights_0_to_1 = (W - x_min) / (x_max - x_min)
+    weights_0_to_255_uint8 = tf.image.convert_image_dtype(weights_0_to_1, dtype=tf.uint8)
+
+    # convert to image summary format
+    # [channels_out, height, width, channels_in]
+    # number of images = channels_out
+    return tf.transpose(weights_0_to_255_uint8, [3, 0, 1, 2])
+
+
 def conv_layer(input, filter_size, channels_in, channels_out, stride, name='conv'):
     with tf.name_scope(name):
         W = tf.Variable(tf.truncated_normal([filter_size, filter_size, channels_in, channels_out], stddev=0.1),
@@ -26,6 +39,10 @@ def conv_layer(input, filter_size, channels_in, channels_out, stride, name='conv
         tf.summary.histogram("weights", W)
         tf.summary.histogram("biases", b)
         tf.summary.histogram("activations", act)
+
+        if channels_in == 1:
+            tf.summary.image("W", weights_to_image(W), channels_out)
+
         return act
 
 
@@ -48,9 +65,10 @@ mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
 
 # input X (batch_size x 28 x 28 x 1)
 X = tf.placeholder(tf.float32, [None, 28, 28, 1])
+tf.summary.image("X", X)
 
 # middle layer parameters
-L1 = 15
+L1 = 12
 L2 = 20
 L3 = 20
 L4 = 100
@@ -93,10 +111,10 @@ tf.global_variables_initializer().run()
 
 # TensorBoard
 merged_summary = tf.summary.merge_all()
-writer = tf.summary.FileWriter('tmp/demo5')
+writer = tf.summary.FileWriter('tmp/demo15')
 writer.add_graph(sess.graph)
 
-N = 200
+N = 1000
 
 factor = 10
 
